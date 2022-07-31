@@ -1,0 +1,31 @@
+{
+  "name": "bookshelf-api",
+  "version": "1.0.0",
+  "description": "Membuat API Bookshelf untuk submission DICODING belajar BACK-end",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "watch": "nodemon ./src/server.js",
+    "lint": "eslint ./src"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/neunicorn/bookshelf-API.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/neunicorn/bookshelf-API/issues"
+  },
+  "homepage": "https://github.com/neunicorn/bookshelf-API#readme",
+  "dependencies": {
+    "@hapi/hapi": "^20.2.2",
+    "nanoid": "^4.0.0"
+  },
+  "devDependencies": {
+    "eslint": "^8.20.0",
+    "eslint-config-google": "^0.14.0",
+    "nodemon": "^2.0.19"
+  }
+}
