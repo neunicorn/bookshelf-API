@@ -80,4 +80,89 @@ const getAllBooksHandler = (request, h) => ({
   },
 });
 
-module.exports = {addBookHandler, getAllBooksHandler};
+const getOneBookHandler = (request, h) => {
+  const {bookId} = request.params;
+  const book = books.find((book)=> book.id === bookId);
+  console.log(book);
+  if (book !== undefined) {
+    const response = h.response({
+      status: 'success',
+      data: {
+        book,
+      },
+    });
+    response.code(200);
+    console.log(`Buku dengan id: ${bookId} ditemukan`);
+    return response;
+  }
+  const response = h.response({
+    status: 'fail',
+    message: 'Buku tidak ditemukan',
+  });
+  response.code(404);
+  console.log('buku tidak ditemukan');
+  return response;
+};
+
+const updateBookHandler = (request, h) => {
+  const {bookId} = request.params;
+  const {payload} = request;
+  const {name, year, author, summary, publisher, pageCount, readPage} = payload;
+
+  if (name === undefined) {
+    const response = h.response({
+      status: 'fail',
+      message: 'Gagal memperbaharui buku. Mohon isi nama buku',
+    });
+    response.code(400);
+    console.log('gagal memperbaharui buku, mohon isi nama buku');
+    return response;
+  }
+  if (readPage > pageCount) {
+    const response = h.response({
+      status: 'fail',
+      message: 'Gagal memperbaharui buku. readPage tidak boleh lebih besar dari pageCount',
+    });
+    response.code(400);
+    console.log('gagal memperbaharui buku, readPage tidak boleh lebih besar dari pageCount');
+    return response;
+  }
+
+  const updateAt = new Date().toISOString();
+  const index = books.findIndex((book) => book.id === bookId);
+  console.log(index);
+  if (index !== -1) {
+    const updateBook = books[index];
+    updateBook.name = name;
+    updateBook.year = year;
+    updateBook.author = author;
+    updateBook.summary = summary;
+    updateBook.publisher = publisher;
+    updateBook.pageCount = pageCount;
+    updateBook.readPage = readPage;
+    updateBook.updatedAt = updateAt;
+    updateBook.finished = pageCount === readPage;
+    updateBook.reading = !updateBook.finished;
+    books[index] = updateBook;
+
+    const response = h.response({
+      status: 'success',
+      message: 'Buku berhasil diperbaharui',
+    });
+    response.code(200);
+    console.log('Buku berhasil diperbaharui');
+    return response;
+  } else {
+    const response = h.response({
+      status: 'fail',
+      message: 'Gagal memperbarui buku, Id tidak ditemukan',
+    });
+    response.code(404);
+    console.log('Gagal memperbarui buku, Id tidak ditemukan');
+    return response;
+  }
+};
+
+const deleteBookHandler = (request, h) => {
+};
+module.exports = {addBookHandler, getAllBooksHandler, getOneBookHandler, updateBookHandler, deleteBookHandler};
