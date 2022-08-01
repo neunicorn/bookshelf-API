@@ -1,7 +1,11 @@
+/* eslint-disable valid-jsdoc */
 /* eslint-disable max-len */
+
 const {nanoid} = require('nanoid');
 const booksList = require('./books');
 
+
+/** Function handler untuk menambahkan buku baru*/
 const addBookHandler = (request, h) =>{
   const {payload} = request;
   const {name, year, author, summary, publisher, pageCount, readPage, reading} = payload;
@@ -72,14 +76,110 @@ const addBookHandler = (request, h) =>{
   return response;
 };
 
+/** Function handler untuk mengambil buku sesuai dengan kondisi */
 const getAllBooksHandler = (request, h) => {
-  // get book list from query params name=dicoding if query params defined
+  // get book list from query params
   const {query} = request;
-  const {name, reading, finished} = query;
-  const buku = booksList;
+  const nama = query.name;
+  const baca = query.reading;
+  const selesai = query.finished;
   let books = [''];
 
-  console.log({query});
+  if (nama !== undefined && nama.toLowerCase() === 'dicoding') {
+    console.log('masuk keisini fillter dicoding');
+    const book = booksList.filter((book) => book.name.toLowerCase().includes(nama.toLowerCase()));
+    books = book.map((book) => {
+      return {
+        id: book.id,
+        name: book.name,
+        publisher: book.publisher,
+      };
+    });
+    const response = h.response({
+      status: 'success',
+      data: {
+        books,
+      },
+    });
+    response.code(200);
+    return response;
+  }
+
+  if (baca !== undefined) {
+    if (baca === '1') {
+      const book = booksList.filter((book) => book.reading === true);
+      books = book.map((book) => {
+        return {
+          id: book.id,
+          name: book.name,
+          publisher: book.publisher,
+        };
+      });
+      const response = h.response({
+        status: 'success',
+        data: {
+          books,
+        },
+      });
+      response.code(200);
+      return response;
+    } else if (baca === '0') {
+      const book = booksList.filter((book) => book.reading === false);
+      books = book.map((book) => {
+        return {
+          id: book.id,
+          name: book.name,
+          publisher: book.publisher,
+        };
+      });
+    }
+    const response = h.response({
+      status: 'success',
+      data: {
+        books,
+      },
+    });
+    response.code(200);
+    return response;
+  }
+
+  if (selesai !== undefined) {
+    if (selesai === '1') {
+      const book = booksList.filter((book) => book.finished === true);
+      books = book.map((book) => {
+        return {
+          id: book.id,
+          name: book.name,
+          publisher: book.publisher,
+        };
+      });
+      const response = h.response({
+        status: 'success',
+        data: {
+          books,
+        },
+      });
+      response.code(200);
+      return response;
+    } else if (selesai === '0') {
+      const book = booksList.filter((book) => book.finished === false);
+      books = book.map((book) => {
+        return {
+          id: book.id,
+          name: book.name,
+          publisher: book.publisher,
+        };
+      });
+      const response = h.response({
+        status: 'success',
+        data: {
+          books,
+        },
+      });
+      response.code(200);
+      return response;
+    }
+  }
 
   // map books to get properties id, name, publisher
   books = booksList.map((book) => {
@@ -101,7 +201,7 @@ const getAllBooksHandler = (request, h) => {
   return response;
 };
 
-
+/** Function handler untuk mengambil buku berdasarkan id */
 const getOneBookHandler = (request, h) => {
   const {bookId} = request.params;
   const book = booksList.find((book)=> book.id === bookId);
@@ -127,6 +227,7 @@ const getOneBookHandler = (request, h) => {
   return response;
 };
 
+/** function handler untuk mengupdate data buku */
 const updateBookHandler = (request, h) => {
   const {bookId} = request.params;
   const {payload} = request;
@@ -195,6 +296,7 @@ const updateBookHandler = (request, h) => {
   return response;
 };
 
+/** function untuk menghapus buku */
 const deleteBookHandler = (request, h) => {
   const {bookId} = request.params;
   const index = booksList.findIndex((book) => book.id === bookId);
@@ -214,6 +316,7 @@ const deleteBookHandler = (request, h) => {
     status: 'fail',
     message: 'Buku gagal dihapus. Id tidak ditemukan',
   });
+
   response.code(404);
   console.log('Buku gagal dihapus. Id tidak ditemukan');
   return response;
