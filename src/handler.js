@@ -95,6 +95,7 @@ const getOneBookHandler = (request, h) => {
     console.log(`Buku dengan id: ${bookId} ditemukan`);
     return response;
   }
+
   const response = h.response({
     status: 'fail',
     message: 'Buku tidak ditemukan',
@@ -107,7 +108,14 @@ const getOneBookHandler = (request, h) => {
 const updateBookHandler = (request, h) => {
   const {bookId} = request.params;
   const {payload} = request;
-  const {name, year, author, summary, publisher, pageCount, readPage} = payload;
+  const {name,
+    year,
+    author,
+    summary,
+    publisher,
+    pageCount,
+    readPage,
+  } = payload;
 
   if (name === undefined) {
     const response = h.response({
@@ -118,6 +126,7 @@ const updateBookHandler = (request, h) => {
     console.log('gagal memperbaharui buku, mohon isi nama buku');
     return response;
   }
+
   if (readPage > pageCount) {
     const response = h.response({
       status: 'fail',
@@ -152,17 +161,38 @@ const updateBookHandler = (request, h) => {
     response.code(200);
     console.log('Buku berhasil diperbaharui');
     return response;
-  } else {
-    const response = h.response({
-      status: 'fail',
-      message: 'Gagal memperbarui buku, Id tidak ditemukan',
-    });
-    response.code(404);
-    console.log('Gagal memperbarui buku, Id tidak ditemukan');
-    return response;
   }
+
+  const response = h.response({
+    status: 'fail',
+    message: 'Gagal memperbarui buku, Id tidak ditemukan',
+  });
+  response.code(404);
+  console.log('Gagal memperbarui buku, Id tidak ditemukan');
+  return response;
 };
 
 const deleteBookHandler = (request, h) => {
+  const {bookId} = request.params;
+  const index = books.findIndex((book) => book.id === bookId);
+
+  if (index !== -1) {
+    books.splice(index, 1);
+    const response = h.response({
+      status: 'success',
+      message: 'Buku berhasil dihapus',
+    });
+    response.code(200);
+    console.log('Buku berhasil dihapus');
+    return response;
+  }
+
+  const response = h.response({
+    status: 'fail',
+    message: 'Buku gagal dihapus. Id tidak ditemukan',
+  });
+  response.code(404);
+  console.log('Buku gagal dihapus. Id tidak ditemukan');
+  return response;
 };
 module.exports = {addBookHandler, getAllBooksHandler, getOneBookHandler, updateBookHandler, deleteBookHandler};
