@@ -1,14 +1,14 @@
 /* eslint-disable max-len */
 const {nanoid} = require('nanoid');
-const books = require('./books');
+const booksList = require('./books');
 
 const addBookHandler = (request, h) =>{
   const {payload} = request;
-  const {name, year, author, summary, publisher, pageCount, readPage} = payload;
+  const {name, year, author, summary, publisher, pageCount, readPage, reading} = payload;
 
   const id = nanoid(16);
   const finished = pageCount === readPage;
-  const reading = !finished;
+  // const reading = !finished;
   const insertedAt = new Date().toISOString();
   const updatedAt = insertedAt;
 
@@ -26,9 +26,6 @@ const addBookHandler = (request, h) =>{
     insertedAt,
     updatedAt,
   };
-
-  books.push(newBook);
-
   if (typeof(name) === 'undefined') {
     const response = h.response({
       status: 'fail',
@@ -49,8 +46,10 @@ const addBookHandler = (request, h) =>{
     return response;
   }
 
+  booksList.push(newBook);
+
   // check if book is already in the array
-  const isAlready = books.filter((book) => book.id === id).length > 0;
+  const isAlready = booksList.filter((book) => book.id === id).length > 0;
   if (isAlready) {
     const response = h.response({
       status: 'success',
@@ -73,16 +72,39 @@ const addBookHandler = (request, h) =>{
   return response;
 };
 
-const getAllBooksHandler = (request, h) => ({
-  status: 'success',
-  data: {
-    books,
-  },
-});
+const getAllBooksHandler = (request, h) => {
+  // get book list from query params name=dicoding if query params defined
+  const {query} = request;
+  const {name, reading, finished} = query;
+  const buku = booksList;
+  let books = [''];
+
+  console.log({query});
+
+  // map books to get properties id, name, publisher
+  books = booksList.map((book) => {
+    return {
+      id: book.id,
+      name: book.name,
+      publisher: book.publisher,
+    };
+  });
+
+  const response = h.response({
+    status: 'success',
+    data: {
+      books,
+    },
+  });
+  response.code(200);
+  console.log('buku berhasil ditemukan');
+  return response;
+};
+
 
 const getOneBookHandler = (request, h) => {
   const {bookId} = request.params;
-  const book = books.find((book)=> book.id === bookId);
+  const book = booksList.find((book)=> book.id === bookId);
   console.log(book);
   if (book !== undefined) {
     const response = h.response({
@@ -115,12 +137,13 @@ const updateBookHandler = (request, h) => {
     publisher,
     pageCount,
     readPage,
+    reading,
   } = payload;
 
   if (name === undefined) {
     const response = h.response({
       status: 'fail',
-      message: 'Gagal memperbaharui buku. Mohon isi nama buku',
+      message: 'Gagal memperbarui buku. Mohon isi nama buku',
     });
     response.code(400);
     console.log('gagal memperbaharui buku, mohon isi nama buku');
@@ -130,7 +153,7 @@ const updateBookHandler = (request, h) => {
   if (readPage > pageCount) {
     const response = h.response({
       status: 'fail',
-      message: 'Gagal memperbaharui buku. readPage tidak boleh lebih besar dari pageCount',
+      message: 'Gagal memperbarui buku. readPage tidak boleh lebih besar dari pageCount',
     });
     response.code(400);
     console.log('gagal memperbaharui buku, readPage tidak boleh lebih besar dari pageCount');
@@ -138,10 +161,10 @@ const updateBookHandler = (request, h) => {
   }
 
   const updateAt = new Date().toISOString();
-  const index = books.findIndex((book) => book.id === bookId);
+  const index = booksList.findIndex((book) => book.id === bookId);
   console.log(index);
   if (index !== -1) {
-    const updateBook = books[index];
+    const updateBook = booksList[index];
     updateBook.name = name;
     updateBook.year = year;
     updateBook.author = author;
@@ -151,12 +174,12 @@ const updateBookHandler = (request, h) => {
     updateBook.readPage = readPage;
     updateBook.updatedAt = updateAt;
     updateBook.finished = pageCount === readPage;
-    updateBook.reading = !updateBook.finished;
-    books[index] = updateBook;
+    updateBook.reading = reading;
+    booksList[index] = updateBook;
 
     const response = h.response({
       status: 'success',
-      message: 'Buku berhasil diperbaharui',
+      message: 'Buku berhasil diperbarui',
     });
     response.code(200);
     console.log('Buku berhasil diperbaharui');
@@ -165,19 +188,19 @@ const updateBookHandler = (request, h) => {
 
   const response = h.response({
     status: 'fail',
-    message: 'Gagal memperbarui buku, Id tidak ditemukan',
+    message: 'Gagal memperbarui buku. Id tidak ditemukan',
   });
   response.code(404);
-  console.log('Gagal memperbarui buku, Id tidak ditemukan');
+  console.log('Gagal memperbarui buku. Id tidak ditemukan');
   return response;
 };
 
 const deleteBookHandler = (request, h) => {
   const {bookId} = request.params;
-  const index = books.findIndex((book) => book.id === bookId);
+  const index = booksList.findIndex((book) => book.id === bookId);
 
   if (index !== -1) {
-    books.splice(index, 1);
+    booksList.splice(index, 1);
     const response = h.response({
       status: 'success',
       message: 'Buku berhasil dihapus',
@@ -195,4 +218,11 @@ const deleteBookHandler = (request, h) => {
   console.log('Buku gagal dihapus. Id tidak ditemukan');
   return response;
 };
-module.exports = {addBookHandler, getAllBooksHandler, getOneBookHandler, updateBookHandler, deleteBookHandler};
+
+module.exports = {
+  addBookHandler,
+  getAllBooksHandler,
+  getOneBookHandler,
+  updateBookHandler,
+  deleteBookHandler,
+};
